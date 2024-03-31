@@ -13,4 +13,12 @@ public class Verse {
     public void setContent(String content) {
         this.content = content;
     }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

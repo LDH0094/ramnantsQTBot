@@ -13,6 +13,14 @@ public class QTEntity {
     public void setVerses(List<Verse> verses) {
         this.verses = verses;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public List<Verse> getVerses() {
+        return verses;
+    }
 // Constructors, getters, and setters
 }
 
