@@ -6,6 +6,7 @@ import lee.ramnants.ramnants_qt_bot.repository.QTRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,31 +30,43 @@ public class QTService {
         try {
             String qtHtml = qtRepository.fetchQTOfTheDay();
             Document doc = Jsoup.parse(qtHtml);
-            Element bibleDiv = doc.selectFirst("div.bible");
-            if (bibleDiv != null) {
-                for (Element p : bibleDiv.select("p")) {
-                    QTEntity qtEntity = new QTEntity();
-                    qtEntity.setTitle(p.text());
 
-                    List<Verse> verses = new ArrayList<>();
-                    for (Element table : bibleDiv.select("table")) {
-                        Element th = table.selectFirst("th");
-                        Element td = table.selectFirst("td");
-                        if (th != null && td != null) {
-                            Verse verse = new Verse();
-                            verse.setNumber(parseInt(th.text()));
-                            verse.setContent(td.text());
-                            verses.add(verse);
+            // Select the div element with class "font-size" to get QT header and chapter
+            Element headerDivElement = doc.selectFirst("div.font-size");
+            if (headerDivElement != null) {
+                String header = headerDivElement.selectFirst("span").text();
+                String chapter = headerDivElement.selectFirst("em").text();
+
+                // Select all <div class="bible"> elements
+                Elements bibleDivs = doc.select("div.bible");
+                for (Element bibleDiv : bibleDivs) {
+                    // Get the title of each section within the <div class="bible">
+                    Elements sectionTitles = bibleDiv.select("p.title");
+                    for (Element sectionTitle : sectionTitles) {
+                        // Create a new QTEntity for each section title
+                        QTEntity qtEntity = new QTEntity();
+                        qtEntity.setQTTitle(header);
+                        qtEntity.setQTChapter(chapter);
+                        qtEntity.setTitle(sectionTitle.text());
+
+                        // Loop over all <table> elements after the section title
+                        Element nextSibling = sectionTitle.nextElementSibling();
+                        List<Verse> verses = new ArrayList<>();
+                        while (nextSibling != null && nextSibling.tagName().equals("table")) {
+                            Element th = nextSibling.selectFirst("th");
+                            Element td = nextSibling.selectFirst("td");
+                            if (th != null && td != null) {
+                                Verse verse = new Verse();
+                                verse.setNumber(Integer.parseInt(th.text()));
+                                verse.setContent(td.text());
+                                verses.add(verse);
+                            }
+                            nextSibling = nextSibling.nextElementSibling();
                         }
+                        qtEntity.setVerses(verses);
+                        qtEntities.add(qtEntity);
                     }
-                    qtEntity.setVerses(verses);
-                    qtEntities.add(qtEntity);
                 }
-            } else {
-                // If no QT content found, you may choose to throw an exception or return an empty list
-                // throw new IllegalStateException("Failed to find QT content");
-                // Or return an empty list
-                 return Collections.emptyList();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,4 +78,5 @@ public class QTService {
         }
         return qtEntities;
     }
+
 }
