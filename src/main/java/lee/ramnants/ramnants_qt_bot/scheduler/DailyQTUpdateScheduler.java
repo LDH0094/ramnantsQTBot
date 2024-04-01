@@ -29,15 +29,22 @@ public class DailyQTUpdateScheduler {
         this.authService = authService;
         this.qtPostService = qtPostService;
     }
+//    @Scheduled(cron = "*/10 * * * * *")
+    public void logger(){
+        log.info("Made QT request on {}", dateFormat.format(new Date()));
+        System.out.println("MADE QT LOGGER");
+
+    }
 
     // Scheduled task to run daily at 4 AM
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 4 * * *")
     public void updateQTOfTheDay() {
         // Make the API call to get the QT of the day
        List<QTEntity> qtOfTheDay =  qtService.getQTOfTheDay();
         // logic starts here
         StringBuilder result = new StringBuilder();
 
+        System.out.println("QT" + qtOfTheDay);
         QTEntity firstQtEntity = qtOfTheDay.get(0); // Assuming there's at least one element in the list
         result.append("오늘의 성경말씀 🙏\n").append(firstQtEntity.getQTTitle()).append("\n");
         result.append("성경 구절: ").append(firstQtEntity.getQTChapter()).append("\n\n");
