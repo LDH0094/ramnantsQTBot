@@ -49,8 +49,8 @@ public class QTServiceTest {
         System.out.println(result);
         AuthService authService = new AuthService(new RestTemplate());
         String accessToken = authService.login();
-        QTPostService qtPostService = new QTPostService(new RestTemplate(),  new ObjectMapper());
-        qtPostService.postQT(accessToken, result.toString());
+//        QTPostService qtPostService = new QTPostService(new RestTemplate(),  new ObjectMapper());
+//        qtPostService.postQT(accessToken, result.toString());
         System.out.println("accessToken is: " + accessToken);
         // logic ends here
     }
